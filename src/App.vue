@@ -4,7 +4,9 @@
     <l-map :zoom="zoom" :center="center" :options="mapOptions" style="height: 80%" @update:center="centerUpdate" @update:zoom="zoomUpdate">
         <l-tile-layer :url="url" :attribution="attribution"/>
             <template v-for="(point, index) in points">
-                <l-marker :lat-lng="latLng(point[0], point[1])" :key="point + index" @click="agregarInd(index)" :draggable="true"></l-marker>
+                <l-marker :lat-lng="latLng(point[0], point[1])" :key="point + index" @click="agregarInd(index)" :draggable="true">
+                    <l-tooltip :options="{ permanent: true }">{{index + 1}}</l-tooltip>
+                </l-marker>
             </template>
             <template v-for="(line, index) in relationsLine">
                 <l-polyline :lat-lngs="relationsLine[index].latlngs" :color="relationsLine[index].color" :key="relationsLine + index"></l-polyline>
@@ -14,15 +16,21 @@
             </template>
     </l-map>
     <br>
-    <center><button @click="borrarPuntos()" align="center">Borrar selección</button></center>
-    <br>
+    <center>
+        <button @click="borrarPuntos()" align="center">Borrar selección</button>
+        <!--<center><h3>Camino mínimo:</h3>
+        <template v-for="(value, index) in path">
+            <h4 :key="value + index">{{value + " - "}}</h5>
+        </template>-->
+        <h3>Camino mínimo: {{this.path}}</h3>
+    </center>
 </div>
 
 </template>
 
 <script>
 import { latLng } from "leaflet";
-import { LMap, LTileLayer, LMarker, LPolyline } from "vue2-leaflet";
+import { LMap, LTileLayer, LMarker, LPolyline, LTooltip } from "vue2-leaflet";
 
 export default {
     name: "Example",
@@ -30,7 +38,8 @@ export default {
         LMap,
         LTileLayer,
         LMarker,
-        LPolyline
+        LPolyline,
+        LTooltip
     },
     data() {
         return {
@@ -53,10 +62,12 @@ export default {
                 [47.41022, -1.207482],
                 [47.40522, -1.200482],
                 [47.39822, -1.225482],
+                [47.41922, -1.200482],
+                [47.39822, -1.250282],
             ],
             /*Matriz de relaciones entre los nodos*/
             relationsPair:[
-                [1,2], [1,3], [2,4], [3,4], [2,5], [4,5], [1,6], [2,6], [5,6]
+                [1,2], [1,3], [2,4], [3,4], [2,5], [4,5], [1,6], [2,6], [5,6], [3,7], [4,7], [5,7], [1,8], [6,8]
             ],
             /*Numero de nodos*/
             nodesNumber: 0,
@@ -132,7 +143,8 @@ export default {
         borrarPuntos(){
             this.indexes = []
             this.arrNodes = []
-            this.minPath.latlngs = []
+            this.minPath.latlngs = [],
+            this.path = []
         },
         addEdge(u, v, w){
             u = u - 1
