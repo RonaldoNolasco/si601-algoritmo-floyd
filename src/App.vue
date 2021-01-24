@@ -4,22 +4,18 @@
     <l-map :zoom="zoom" :center="center" :options="mapOptions" style="height: 80%" @update:center="centerUpdate" @update:zoom="zoomUpdate">
         <l-tile-layer :url="url" :attribution="attribution"/>
             <template v-for="(point, index) in points">
-                <l-marker :lat-lng="latLng(point[0], point[1])" :key="point + index" @click="agregarInd(index)"></l-marker>
+                <l-marker :lat-lng="latLng(point[0], point[1])" :key="point + index" @click="agregarInd(index)" :draggable="true"></l-marker>
             </template>
-            <template v-for="(line, index) in lines">
-                <l-polyline :lat-lngs="lines[index].latlngs" :color="lines[index].color" :key="line + index"></l-polyline>
+            <template v-for="(line, index) in relationsLine">
+                <l-polyline :lat-lngs="relationsLine[index].latlngs" :color="relationsLine[index].color" :key="relationsLine + index"></l-polyline>
             </template>
             <template v-if = "this.minPath.latlngs.length >= 2">
                 <l-polyline :lat-lngs="this.minPath.latlngs" :color="this.minPath.color"></l-polyline>
             </template>
     </l-map>
-    <button @click="borrarPuntos()">Borrer puntos</button>
     <br>
-    {{this.indexes}}
+    <center><button @click="borrarPuntos()" align="center">Borrar selección</button></center>
     <br>
-    {{this.arrNodes}}
-    <br>
-    {{this.minPath.latlngs}}
 </div>
 
 </template>
@@ -49,30 +45,22 @@ export default {
             mapOptions: {
                 zoomSnap: 0.5
             },
+            /*Coordenadas de los nodos*/
             points:[
                 [47.41422, -1.250482],
                 [47.41122, -1.230482],
                 [47.42022, -1.230482],
-                [47.41222, -1.210482]
+                [47.41022, -1.207482],
+                [47.40522, -1.200482],
+                [47.39822, -1.225482],
             ],
-            lines: [
-                {
-                    latlngs: [[47.41422, -1.250482], [47.41122, -1.230482]],
-                    color: 'blue'
-                },
-                {
-                    latlngs: [[47.41422, -1.250482], [47.42022, -1.230482]],
-                    color: 'blue'
-                },
-                {
-                    latlngs: [[47.42022, -1.230482], [47.41222, -1.210482]],
-                    color: 'blue'
-                },
-                {
-                    latlngs: [[47.41122, -1.230482], [47.41222, -1.210482]],
-                    color: 'blue'
-                }
+            /*Matriz de relaciones entre los nodos*/
+            relationsPair:[
+                [1,2], [1,3], [2,4], [3,4], [2,5], [4,5], [1,6], [2,6], [5,6]
             ],
+            /*Numero de nodos*/
+            nodesNumber: 0,
+            relationsLine: [],
             minPath:{
                 latlngs: [],
                 color: 'red'
@@ -87,6 +75,7 @@ export default {
         };
     },
     created: function(){
+        /*Inicializando el d y el parent */
         for(let i = 0; i < this.MX; i++) {
             this.d.push([]);
             this.parent.push([]);
@@ -96,20 +85,33 @@ export default {
             }
         }
 
-        for (let i = 0; i < 4; i++){
-            for (let j = 0; j < 4; j++){
+        this.nodesNumber = this.points.length //Hallando el numero de nodos
+
+        /*Asignando -1 a las diagonales e infinito a los restantes*/
+        for (let i = 0; i < this.nodesNumber; i++){
+            for (let j = 0; j < this.nodesNumber; j++){
                 this.d[i][j] = this.INF
                 this.parent[i][j] = -1
             }
         this.d[i][i] = 0
         }
 
-        this.addEdge(1, 2, 3)
-        this.addEdge(2, 4, 4)
-        this.addEdge(1, 3, 5)
-        this.addEdge(3, 4, 7)
+        /*Hallando las lineas de todas las relaciones*/
+        for(let value of this.relationsPair){
+            this.relationsLine.push(
+                {
+                    latlngs: [this.points[value[0]-1], this.points[value[1]-1]],
+                    color: "blue"
+                }
+            )
+        }
 
-        this.floydWarshall(4)
+        /*Hallando la distancia pitagórica de todos los caminos y agregandola a la matriz*/
+        for(let value of this.relationsPair){
+            this.addEdge(value[0], value[1], Math.sqrt(Math.pow(this.points[value[0]-1][0] - this.points[value[1]-1][0], 2) + Math.pow(this.points[value[0]-1][1] - this.points[value[1]-1][1], 2) ) )
+        }
+
+        this.floydWarshall(this.nodesNumber)
     },
     methods: {
         zoomUpdate(zoom) {
@@ -129,6 +131,8 @@ export default {
         },
         borrarPuntos(){
             this.indexes = []
+            this.arrNodes = []
+            this.minPath.latlngs = []
         },
         addEdge(u, v, w){
             u = u - 1
