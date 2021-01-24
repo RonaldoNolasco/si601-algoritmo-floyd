@@ -1,5 +1,5 @@
 var MX = 300;
-var INF = 1e9;
+var INF = 1e10;
 
 var d = [];
 var parent = [];
