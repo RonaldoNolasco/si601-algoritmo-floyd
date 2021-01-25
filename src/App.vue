@@ -21,7 +21,7 @@
     <br>
     <center>
         <label for="nodoInicial"> Nodo inicial: </label>
-        <select name="nodoInicial" id="nodoInicial">
+        <select name="nodoInicial" id="nodoInicial" v-model="inputNodoInicial" @change="actualizarIndex()">
             <option value="-">-</option>
             <template v-for="(point, index) in points">
                 <option :key="point + index" :value="point.name">{{point.name}}</option>
@@ -30,7 +30,7 @@
         <br>
         <br>
         <label for="nodoFinal"> Nodo final: </label>
-        <select name="nodoFinal" id="nodoFinal">
+        <select name="nodoFinal" id="nodoFinal" v-model="inputNodoFinal" @change="actualizarIndex()">
             <option value="-">-</option>
             <template v-for="(point, index) in points">
                 <option :key="point + index" :value="point.name">{{point.name}}</option>
@@ -38,10 +38,10 @@
         </select>
         <br>
         <br>
-        <button>Buscar camino más corto</button>
+        <button @click="buscarCamino()">Buscar camino más corto</button>
         <br>
         <br>
-        <button @click="borrarPuntos()" align="center">Borrar selección</button>
+        <button @click="borrarSeleccion()">Borrar selección</button>
         <!--<center><h3>Camino mínimo:</h3>
         <template v-for="(value, index) in path">
             <h4 :key="value + index">{{value + " - "}}</h5>
@@ -1548,6 +1548,8 @@ export default {
                 latlngs: [],
                 color: 'red'
             },
+            inputNodoInicial: "",
+            inputNodoFinal: "",
             indexes:[],
             MX: 300,
             INF: 1e10,
@@ -1616,12 +1618,31 @@ export default {
                 }
             }
         },
-        borrarPuntos(){
+        actualizarIndex(){
+            for (let [index,value] of this.points.entries() ){
+                if(value.name == this.inputNodoInicial) this.indexes[0] = index+1
+                if(value.name == this.inputNodoFinal) this.indexes[1] = index+1
+            }
+        },
+        buscarCamino(){
+            if (this.indexes.length == 2){
+                this.arrNodes = this.getPath(this.indexes[0], this.indexes[1])
+                if(this.minPath.latlngs.length == 0){            
+                    for (let value of this.arrNodes){
+                        this.minPath.latlngs.push([this.points[value-1].coord1, this.points[value-1].coord2]);
+                        this.arrNames.push(this.points[value-1].name)
+                    }
+                }
+            }
+        },
+        borrarSeleccion(){
             this.indexes = []
             this.arrNodes = []
             this.arrNames = []
             this.minPath.latlngs = [],
             this.path = []
+            this.inputNodoInicial = ""
+            this.inputNodoFinal = ""
         },
         addEdge(u, v, w){
             u = u - 1
