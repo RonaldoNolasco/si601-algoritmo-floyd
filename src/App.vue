@@ -22,7 +22,7 @@
         <template v-for="(value, index) in path">
             <h4 :key="value + index">{{value + " - "}}</h5>
         </template>-->
-        <h3>Camino mínimo: {{this.path}}</h3>
+        <h3>Camino mínimo: {{this.arrNames}}</h3>
     </center>
 </div>
 
@@ -43,12 +43,12 @@ export default {
     },
     data() {
         return {
-            zoom: 13,
+            zoom: 10,
             center: latLng(-12.2833333, -76.2),
             url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             attribution:
                 '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-            currentZoom: 11.5,
+            currentZoom: 10,
             currentCenter: latLng(-12.2833333, -76.2),
             showParagraph: false,
             mapOptions: {
@@ -1529,6 +1529,7 @@ export default {
             d: [],
             parent: [],
             arrNodes: [],
+            arrNames: [],
             path:[]
         };
     },
@@ -1584,6 +1585,7 @@ export default {
                 this.arrNodes = this.getPath(this.indexes[0], this.indexes[1])
                 for (let value of this.arrNodes){
                     this.minPath.latlngs.push([this.points[value-1].coord1, this.points[value-1].coord2]);
+                    this.arrNames.push(this.points[value-1].name)
                 }
             }/* Agrega 1 y 7 de nuevo al minpath*/
         },
