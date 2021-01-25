@@ -20,22 +20,27 @@
     </l-map>
     <br>
     <center>
-        <label for="cars">Nodo inicial:</label>
-        <select name="cars" id="cars">
-            <option value="volvo">Volvo</option>
-            <option value="saab">Saab</option>
-            <option value="mercedes">Mercedes</option>
-            <option value="audi">Audi</option>
+        <label for="nodoInicial"> Nodo inicial: </label>
+        <select name="nodoInicial" id="nodoInicial">
+            <option value="-">-</option>
+            <template v-for="(point, index) in points">
+                <option :key="point + index" :value="point.name">{{point.name}}</option>
+            </template>
         </select>
-
-        <label for="cars">Nodo final:</label>
-        <select name="cars" id="cars">
-            <option value="volvo">Volvo</option>
-            <option value="saab">Saab</option>
-            <option value="mercedes">Mercedes</option>
-            <option value="audi">Audi</option>
+        <br>
+        <br>
+        <label for="nodoFinal"> Nodo final: </label>
+        <select name="nodoFinal" id="nodoFinal">
+            <option value="-">-</option>
+            <template v-for="(point, index) in points">
+                <option :key="point + index" :value="point.name">{{point.name}}</option>
+            </template>
         </select>
-
+        <br>
+        <br>
+        <button>Buscar camino más corto</button>
+        <br>
+        <br>
         <button @click="borrarPuntos()" align="center">Borrar selección</button>
         <!--<center><h3>Camino mínimo:</h3>
         <template v-for="(value, index) in path">
@@ -1603,11 +1608,13 @@ export default {
             if (this.indexes.length < 2) this.indexes.push(index+1);
             if (this.indexes.length == 2){
                 this.arrNodes = this.getPath(this.indexes[0], this.indexes[1])
-                for (let value of this.arrNodes){
-                    this.minPath.latlngs.push([this.points[value-1].coord1, this.points[value-1].coord2]);
-                    this.arrNames.push(this.points[value-1].name)
+                if(this.minPath.latlngs.length == 0){            
+                    for (let value of this.arrNodes){
+                        this.minPath.latlngs.push([this.points[value-1].coord1, this.points[value-1].coord2]);
+                        this.arrNames.push(this.points[value-1].name)
+                    }
                 }
-            }/* Agrega 1 y 7 de nuevo al minpath*/
+            }
         },
         borrarPuntos(){
             this.indexes = []
