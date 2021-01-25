@@ -1,7 +1,10 @@
 <template>
-
-<div style="height: 500px; width: 100%">
-    <l-map :zoom="zoom" :center="center" :options="mapOptions" style="height: 125%" @update:center="centerUpdate" @update:zoom="zoomUpdate">
+<div style="height: 500px; width: 100%; align:center">
+    <center>
+        <h1>Algoritmo de Floyd</h1>
+        <h4>El presente programa permite obtener la ruta más corta para cualquier par de nodos.</h4>
+    </center>
+    <l-map :zoom="zoom" :center="center" :options="mapOptions" style="height: 100%" @update:center="centerUpdate" @update:zoom="zoomUpdate">
         <l-tile-layer :url="url" :attribution="attribution"/>
             <template v-for="(point, index) in points">
                 <l-marker :lat-lng="latLng(point.coord1, point.coord2)" :key="point + index" @click="agregarInd(index)">
@@ -17,11 +20,28 @@
     </l-map>
     <br>
     <center>
+        <label for="cars">Nodo inicial:</label>
+        <select name="cars" id="cars">
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="audi">Audi</option>
+        </select>
+
+        <label for="cars">Nodo final:</label>
+        <select name="cars" id="cars">
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="audi">Audi</option>
+        </select>
+
         <button @click="borrarPuntos()" align="center">Borrar selección</button>
         <!--<center><h3>Camino mínimo:</h3>
         <template v-for="(value, index) in path">
             <h4 :key="value + index">{{value + " - "}}</h5>
         </template>-->
+        <h3>Nodos seleccionados: {{this.indexes}}</h3>
         <h3>Camino mínimo: {{this.arrNames}}</h3>
     </center>
 </div>
@@ -1592,6 +1612,7 @@ export default {
         borrarPuntos(){
             this.indexes = []
             this.arrNodes = []
+            this.arrNames = []
             this.minPath.latlngs = [],
             this.path = []
         },
