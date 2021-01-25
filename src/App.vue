@@ -11,6 +11,9 @@
             <template v-for="(line, index) in relationsLine">
                 <l-polyline :lat-lngs="relationsLine[index].latlngs" :color="relationsLine[index].color" :key="relationsLine + index"></l-polyline>
             </template>
+            <template v-if = "this.minPath.latlngs.length >= 2">
+                <l-polyline :lat-lngs="this.minPath.latlngs" :color="this.minPath.color"></l-polyline>
+            </template>
     </l-map>
     <br>
     <center>
@@ -116,7 +119,7 @@ export default {
 
         /*Hallando la distancia pitagórica de todos los caminos y agregandola a la matriz*/
         for(let value of this.relationsPair){
-            this.addEdge(value[0], value[1], Math.sqrt(Math.pow(this.points[value[0]-1][0] - this.points[value[1]-1][0], 2) + Math.pow(this.points[value[0]-1][1] - this.points[value[1]-1][1], 2) ) )
+            this.addEdge(value[0], value[1], Math.sqrt(Math.pow(this.points[value[0]-1].coord1 - this.points[value[1]-1].coord1, 2) + Math.pow(this.points[value[0]-1].coord2 - this.points[value[1]-1].coord2, 2) ) )
         }
 
         this.floydWarshall(this.nodesNumber)
@@ -133,7 +136,7 @@ export default {
             if (this.indexes.length == 2){
                 this.arrNodes = this.getPath(this.indexes[0], this.indexes[1])
                 for (let value of this.arrNodes){
-                    this.minPath.latlngs.push(this.points[value-1]);
+                    this.minPath.latlngs.push([this.points[value-1].coord1, this.points[value-1].coord2]);
                 }
             }/* Agrega 1 y 7 de nuevo al minpath*/
         },
