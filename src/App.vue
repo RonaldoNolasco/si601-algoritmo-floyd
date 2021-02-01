@@ -1658,11 +1658,15 @@ export default {
             this.indexes = []
             this.arrNodes = []
             this.arrNames = []
-            this.minPath.latlngs = [],
+            this.minPath.latlngs = []
             this.path = []
             this.inputNodoInicial = ""
             this.inputNodoFinal = ""
             this.minDistance = 0
+            this.DLatitud = 0
+            this.DLongitud = 0
+            this.a = 0
+            this.c = 0
         },
         addEdge(u, v, w){
             u = u - 1
