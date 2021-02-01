@@ -7,8 +7,8 @@
     <l-map :zoom="zoom" :center="center" :options="mapOptions" style="height: 100%" @update:center="centerUpdate" @update:zoom="zoomUpdate">
         <l-tile-layer :url="url" :attribution="attribution"/>
             <template v-for="(point, index) in points">
-                <l-marker :lat-lng="latLng(point.coord1, point.coord2)" :key="point + index" @click="agregarInd(index)">
-                    <l-tooltip :options="{ permanent: true }">{{point.name}}</l-tooltip>
+                <l-marker :lat-lng="latLng(point.coord1, point.coord2)" :key="point + index" @click="agregarInd(index)" >
+                    <l-tooltip v-show="mostrarCiudades" :options="{ permanent: true }">{{point.name}}</l-tooltip>
                 </l-marker>
             </template>
             <template v-for="(line, index) in relationsLine">
@@ -41,16 +41,29 @@
         <button @click="ciudades()">Mostrar/ocultar ciudades</button>
         <br>
         <br>
-        <button @click="buscarCamino()">Buscar camino más corto</button>
-        <br>
-        <br>
         <button @click="borrarSeleccion()">Borrar selección</button>
+        <br>
+        <br>
+        <button @click="buscarCamino()">Buscar camino más corto</button>
         <!--<center><h3>Camino mínimo:</h3>
         <template v-for="(value, index) in path">
             <h4 :key="value + index">{{value + " - "}}</h5>
         </template>-->
-        <h3>Nodos seleccionados: {{this.indexes}}</h3>
-        <h3>Camino mínimo: {{this.arrNames}}</h3>
+        <h3>Nodos seleccionados: 
+            <template v-for="(value, index) in indexesName">
+                <template v-if="index != indexesName.length - 1">{{value}}, </template>
+                <template v-else>{{value}}</template>
+            </template>
+        </h3>
+
+        <h3>Camino mínimo: 
+            <template v-if="arrNames.length != 0">
+                <template v-for="(value, index) in arrNames">
+                    <template v-if="index != arrNames.length - 1">{{value}} -> </template>
+                    <template v-else>{{value}}</template>
+                </template>
+            </template>
+        </h3>
         <h3>La distancia minima es: {{this.minDistance}} km</h3>
     </center>
 </div>
@@ -1558,6 +1571,7 @@ export default {
             },
             minDistance: 0,
             inputNodoInicial: "",
+            mostrarCiudades: true,
             inputNodoFinal: "",
             indexes:[],
             MX: 300,
@@ -1567,6 +1581,7 @@ export default {
             arrNodes: [],
             arrNames: [],
             path:[],
+            indexesName:[],
             R: 6371,
             DLatitud: 0,
             DLongitud: 0,
@@ -1625,13 +1640,22 @@ export default {
             this.currentCenter = center;
         },
         agregarInd(index){
-            if (this.indexes.length < 2) this.indexes.push(index+1);
+            if (this.indexes.length < 2){
+                this.indexes.push(index+1)
+                this.indexesName.push(this.points[index].name)
+            }
             this.buscarCamino()
         },
         actualizarIndex(){
             for (let [index,value] of this.points.entries() ){
-                if(value.name == this.inputNodoInicial) this.indexes[0] = index+1
-                if(value.name == this.inputNodoFinal) this.indexes[1] = index+1
+                if(value.name == this.inputNodoInicial) {
+                    this.indexes[0] = index+1
+                    this.indexesName[0] = this.points[index].name
+                }
+                if(value.name == this.inputNodoFinal) {
+                    this.indexes[1] = index+1
+                    this.indexesName[1] = this.points[index].name
+                }
             }
         },
         buscarCamino(){
@@ -1647,6 +1671,7 @@ export default {
                     for(let i = 0; i< this.arrNodes.length - 1; i++){
                         this.minDistance += this.d[this.arrNodes[i]-1][this.arrNodes[i+1]-1]
                     }
+                    this.minDistance = Math.round(this.minDistance * 10000) / 10000
                 }
             }
         },
@@ -1655,6 +1680,7 @@ export default {
         },
         borrarSeleccion(){
             this.indexes = []
+            this.indexesName = []
             this.arrNodes = []
             this.arrNames = []
             this.minPath.latlngs = []
