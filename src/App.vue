@@ -38,6 +38,9 @@
         </select>
         <br>
         <br>
+        <button @click="ciudades()">Mostrar/ocultar ciudades</button>
+        <br>
+        <br>
         <button @click="buscarCamino()">Buscar camino más corto</button>
         <br>
         <br>
@@ -48,6 +51,7 @@
         </template>-->
         <h3>Nodos seleccionados: {{this.indexes}}</h3>
         <h3>Camino mínimo: {{this.arrNames}}</h3>
+        <h3>La distancia minima es: {{this.minDistance}} km</h3>
     </center>
 </div>
 
@@ -1547,10 +1551,12 @@ export default {
             /*Numero de nodos*/
             nodesNumber: 0,
             relationsLine: [],
+            /*Objeto con el camino minimo entre los nodos*/
             minPath:{
                 latlngs: [],
                 color: 'red'
             },
+            minDistance: 0,
             inputNodoInicial: "",
             inputNodoFinal: "",
             indexes:[],
@@ -1597,7 +1603,7 @@ export default {
 
         /*Hallando la distancia pitagórica de todos los caminos y agregandola a la matriz*/
         for(let value of this.relationsPair){
-            this.addEdge(value[0], value[1], Math.sqrt(Math.pow(this.points[value[0]-1].coord1 - this.points[value[1]-1].coord1, 2) + Math.pow(this.points[value[0]-1].coord2 - this.points[value[1]-1].coord2, 2) ) )
+            this.addEdge(value[0], value[1], Math.sqrt(Math.pow(this.points[value[0]-1].coord1 - this.points[value[1]-1].coord1, 2) + Math.pow(this.points[value[0]-1].coord2 - this.points[value[1]-1].coord2, 2)) )
         }
 
         this.floydWarshall(this.nodesNumber)
@@ -1611,15 +1617,7 @@ export default {
         },
         agregarInd(index){
             if (this.indexes.length < 2) this.indexes.push(index+1);
-            if (this.indexes.length == 2){
-                this.arrNodes = this.getPath(this.indexes[0], this.indexes[1])
-                if(this.minPath.latlngs.length == 0){            
-                    for (let value of this.arrNodes){
-                        this.minPath.latlngs.push([this.points[value-1].coord1, this.points[value-1].coord2]);
-                        this.arrNames.push(this.points[value-1].name)
-                    }
-                }
-            }
+            this.buscarCamino()
         },
         actualizarIndex(){
             for (let [index,value] of this.points.entries() ){
@@ -1630,13 +1628,22 @@ export default {
         buscarCamino(){
             if (this.indexes.length == 2){
                 this.arrNodes = this.getPath(this.indexes[0], this.indexes[1])
-                if(this.minPath.latlngs.length == 0){            
+                if(this.minPath.latlngs.length == 0){
+                    //Crea la linea de distancia minima
                     for (let value of this.arrNodes){
                         this.minPath.latlngs.push([this.points[value-1].coord1, this.points[value-1].coord2]);
                         this.arrNames.push(this.points[value-1].name)
                     }
+                    //Calcula la distancia minima
+                    for(let i = 0; i < this.minPath.latlngs.length - 1; i++){
+                        this.minDistance += Math.sqrt(Math.pow(this.minPath.latlngs[i][0] - this.minPath.latlngs[i+1][0], 2) + Math.pow(this.minPath.latlngs[i][1] - this.minPath.latlngs[i+1][1], 2))
+                    }
+                    this.minDistance.toFixed(2)
                 }
             }
+        },
+        ciudades(){
+            this.mostrarCiudades = !this.mostrarCiudades
         },
         borrarSeleccion(){
             this.indexes = []
@@ -1646,6 +1653,7 @@ export default {
             this.path = []
             this.inputNodoInicial = ""
             this.inputNodoFinal = ""
+            this.minDistance = 0
         },
         addEdge(u, v, w){
             u = u - 1
