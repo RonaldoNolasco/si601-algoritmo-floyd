@@ -1644,10 +1644,9 @@ export default {
                         this.arrNames.push(this.points[value-1].name)
                     }
                     //Calcula la distancia minima
-                    for(let i = 0; i < this.arrNodes.length - 1; i++){
-                        this.minDistance += this.d[i][i+1]
+                    for(let i = 0; i< this.arrNodes.length - 1; i++){
+                        this.minDistance += this.d[this.arrNodes[i]-1][this.arrNodes[i+1]-1]
                     }
-                    this.minDistance.toFixed(2)
                 }
             }
         },
