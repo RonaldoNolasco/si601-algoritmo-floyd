@@ -1566,7 +1566,12 @@ export default {
             parent: [],
             arrNodes: [],
             arrNames: [],
-            path:[]
+            path:[],
+            R: 6371,
+            DLatitud: 0,
+            DLongitud: 0,
+            a: 0,
+            c: 0
         };
     },
     created: function(){
@@ -1601,9 +1606,13 @@ export default {
             )
         }
 
-        /*Hallando la distancia pitagórica de todos los caminos y agregandola a la matriz*/
+        /*Hallando la distancia de todos los caminos y agregandola a la matriz*/
         for(let value of this.relationsPair){
-            this.addEdge(value[0], value[1], Math.sqrt(Math.pow(this.points[value[0]-1].coord1 - this.points[value[1]-1].coord1, 2) + Math.pow(this.points[value[0]-1].coord2 - this.points[value[1]-1].coord2, 2)) )
+            this.DLatitud = (this.points[value[0]-1].coord1 - this.points[value[1]-1].coord1)*(Math.PI / 180)
+            this.DLongitud = (this.points[value[0]-1].coord2 - this.points[value[1]-1].coord2)*(Math.PI / 180)
+            this.a = Math.pow(Math.sin(this.DLatitud/2),2) + Math.cos(this.points[value[0]-1].coord1)*Math.cos(this.points[value[1]-1].coord1)*Math.pow(Math.sin(this.DLongitud/2),2)
+            this.c = 2*Math.atan2(Math.sqrt(this.a), Math.sqrt(1-this.a))
+            this.addEdge(value[0], value[1], this.R * this.c)
         }
 
         this.floydWarshall(this.nodesNumber)
@@ -1635,8 +1644,8 @@ export default {
                         this.arrNames.push(this.points[value-1].name)
                     }
                     //Calcula la distancia minima
-                    for(let i = 0; i < this.minPath.latlngs.length - 1; i++){
-                        this.minDistance += Math.sqrt(Math.pow(this.minPath.latlngs[i][0] - this.minPath.latlngs[i+1][0], 2) + Math.pow(this.minPath.latlngs[i][1] - this.minPath.latlngs[i+1][1], 2))
+                    for(let i = 0; i < this.arrNodes.length - 1; i++){
+                        this.minDistance += this.d[i][i+1]
                     }
                     this.minDistance.toFixed(2)
                 }
